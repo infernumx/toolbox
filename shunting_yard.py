@@ -65,14 +65,12 @@ def shunting_yard(expr: str) -> list[str]:
             output.append(token)
         elif token in "+-*/^":
             if op_stack:
-                while (
-                    op_stack
-                    and (
+                while op_stack and (
+                    (
                         op_stack[-1] != "("
                         and precedence(op_stack[-1]) > precedence(token)
                     )
-                    or op_stack
-                    and (
+                    or (
                         precedence(op_stack[-1]) == precedence(token)
                         and associativity(token) == "left"
                     )
