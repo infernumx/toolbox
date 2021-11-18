@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import operator
+from typing import Generator
 
 op_funcs = {
     "+": operator.add,
@@ -33,10 +34,31 @@ def associativity(op: str) -> str:
         return "right"
 
 
+def tokenize(expr: str) -> Generator[str, None, None]:
+    number: str = ""
+    end: int = len(expr) - 1
+    for i, char in enumerate(expr):
+        if char.isspace():
+            continue
+
+        if char.isdigit():
+            if number and number[0].isdigit():
+                number += char
+            else:
+                number = char
+
+        if number and (i == end or not char.isdigit()):
+            yield number
+            number = ""
+
+        if char in "+-*/^()":
+            yield char
+
+
 def shunting_yard(expr: str) -> list[str]:
     op_stack: list[str] = []
     output: list[str] = []
-    for token in expr:
+    for token in tokenize(expr):
         if not token:
             continue
         if token.isdigit():
@@ -44,10 +66,16 @@ def shunting_yard(expr: str) -> list[str]:
         elif token in "+-*/^":
             if op_stack:
                 while (
-                    op_stack[-1] != "(" and precedence(op_stack[-1]) > precedence(token)
-                ) or (
-                    precedence(op_stack[-1]) == precedence(token)
-                    and associativity(token) == "left"
+                    op_stack
+                    and (
+                        op_stack[-1] != "("
+                        and precedence(op_stack[-1]) > precedence(token)
+                    )
+                    or op_stack
+                    and (
+                        precedence(op_stack[-1]) == precedence(token)
+                        and associativity(token) == "left"
+                    )
                 ):
                     output.append(op_stack.pop())
             op_stack.append(token)
