@@ -102,7 +102,7 @@ def evaluate_rpn(tokens: list[str]) -> int:
             op2 = stack.pop()
             op1 = stack.pop()
             stack.append(eval_op(token, op1, op2))
-    return stack[0]
+    return stack.pop()
 
 
 def main(expr: str) -> None:
